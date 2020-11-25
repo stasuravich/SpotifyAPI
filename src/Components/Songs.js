@@ -4,7 +4,7 @@ import '../Css/Songs.css';
 const Songs = props=> {
   document.getElementsByClassName("SearchPlaylist")[0].style.visibility="visible";
   const clickSong= e=> {
-    props.setTracks({selectedTrack: e.target.id, listOfTracksFromApi: props.tracks.listOfTracksFromApi});
+    props.setTracks({selectedTrack: e.target.id, listOfTracksFromApi: props.tracks});
   }
   const deleteSong= e=> {
     props.trackDeleted(e.currentTarget.value);

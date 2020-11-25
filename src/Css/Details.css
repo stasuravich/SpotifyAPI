@@ -52,3 +52,9 @@
 .Seekbar{
   width: 480px
 }
+
+.Volume{
+  position: relative;
+  bottom:20px;
+  left: 170px;
+}

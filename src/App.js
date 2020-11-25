@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useEffect} from 'react';
 import './App.css';
 //import SpotifyWeb from 'spotify-web-api-js';
 import Script from 'react-load-script';
@@ -19,6 +19,7 @@ function App() {
   const [logInfo, setLogInfo]=useState('');
   const [wrong, setWrong]=useState(false);
   const [playlists, setPlaylists] = useState({selectedPlaylist:'', listOfPlaylistsFromAPI: []});
+  const [dispPlaylist, setDispPlaylist] = useState();
   const [tracks, setTracks] = useState({selectedTrack:'', listOfTracksFromApi: ''});
   const [trackDetails, setTrackDetails] = useState();
   const [qPlaylist, setQPlaylist] = useState('');
@@ -86,7 +87,8 @@ function App() {
   //   return hashParams;
   // }
 
-  const playlistChanged = useCallback((val)=>{
+  const playlistChanged = (val)=>{
+
     setPlaylists({selectedPlaylist: val,
                   listOfPlaylistsFromAPI: playlists.listOfPlaylistsFromAPI})
     axios(`https://api.spotify.com/v1/playlists/${val}/tracks`, {
@@ -94,8 +96,9 @@ function App() {
       headers: {'Authorization' : 'Bearer ' + logInfo}
     })
     .then (response => {
-       setTracks({listOfTracksFromApi: response.data.items})
-    })}, [playlists.listOfPlaylistsFromAPI]);
+      setDispPlaylist(response.data.items);
+       //setTracks({listOfTracksFromApi: response.data.items})
+    })};
 
   function request(device){
 
@@ -116,8 +119,10 @@ function App() {
 
     })
     .then(response=>{
-      setTrackDetails(response.data.item)
+      setTrackDetails(response.data.item);
+
     })
+    
   }
 
   useEffect(()=>{
@@ -132,6 +137,7 @@ function App() {
       player.connect();
       player.getCurrentState().then(state => {
         if(state) {
+          console.log("Get state selected track")
           request(device)
         }
       });
@@ -148,6 +154,7 @@ function App() {
     if(trackDetails && browser.name!=='safari'){
       const interval = setInterval(() => {
         player.getCurrentState().then(state => {
+          console.log("Get state trackDetails")
           document.getElementById("seekbar").value= state.position/state.duration;
           setDuration(state.duration)
         })
@@ -160,6 +167,7 @@ function App() {
     if(player){
       player.on('player_state_changed', state => {
         if(state){
+          console.log(state)
           setPlaying(!state.paused);
           curPlaying();
         }
@@ -242,8 +250,8 @@ function App() {
 
         </div>
         <div className="Box2">
-          {tracks.listOfTracksFromApi && <Songs items = {search(tracks.listOfTracksFromApi, qPlaylist)} setTracks = {setTracks} tracks={tracks} trackDeleted={trackDeleted} query={qPlaylist}/> }
-          {trackDetails && <Details details={trackDetails} artists = {trackDetails.artists} player= {player} playing={playing} curPlaying={curPlaying} access_token={logInfo} duration={duration}/>}
+          {dispPlaylist && <Songs items = {search(dispPlaylist, qPlaylist)} setTracks = {setTracks} tracks={dispPlaylist} trackDeleted={trackDeleted} query={qPlaylist}/> }
+          {trackDetails && <Details details={trackDetails} artists = {trackDetails.artists} player= {player} playing={playing} access_token={logInfo} duration={duration} tracks={tracks}/>}
         </div>
       </div>}
 
