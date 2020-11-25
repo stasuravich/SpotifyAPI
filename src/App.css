@@ -1,0 +1,21 @@
+.Container {
+  text-align: center;
+
+}
+.Box1 {
+  display: flex;
+  position: sticky;
+  top: 0;
+  background: #FFFFFF;
+  height: 60px;
+  z-index: 10;
+}
+
+.Box2{
+  display: flex;
+}
+
+div{
+  margin: 5px;
+
+}
