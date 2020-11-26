@@ -3,16 +3,29 @@ import '../Css/Details.css';
 import axios from 'axios'
 
 const Details = props => {
-
+  const compute = _ =>{
+    let count=0;
+    for(const elem of props.tracks.listOfTracksFromApi.entries()){
+      if(props.tracks.selectedTrack.id===elem[1].track.id){
+        return count;
+      }
+      count++;
+    }
+    return -1;
+  }
   function onPrevClick(){
-    if(props.tracks.listOfTracksFromApi[0].track.id===props.details.id){
+
+    if(props.tracks.listOfTracksFromApi[0].track.name===props.tracks.selectedTrack.name){
       props.player.seek(0);
     }
     else{
-      axios('https://api.spotify.com/v1/me/player/previous', {
-        method: 'POST',
-        headers: {'Authorization' : 'Bearer ' + props.access_token}
-      })
+      let index=compute();
+      if (index>-1){
+        props.setTracks({selectedTrack: props.tracks.listOfTracksFromApi[index-1].track, listOfTracksFromApi: props.tracks.listOfTracksFromApi});
+      }
+      else{
+        props.player.previousTrack();
+      }
     }
 
   }
@@ -23,10 +36,14 @@ const Details = props => {
   }
 
   function onNextClick(){
-    axios('https://api.spotify.com/v1/me/player/next', {
-      method: 'POST',
-      headers: {'Authorization' : 'Bearer ' + props.access_token}
-    })
+    let index=compute();
+    if(props.tracks.listOfTracksFromApi[props.tracks.listOfTracksFromApi.length-1].track.id===props.tracks.selectedTrack.id || index===-1){
+      props.player.nextTrack();
+    }
+    else{
+
+      props.setTracks({selectedTrack: props.tracks.listOfTracksFromApi[index+1].track, listOfTracksFromApi: props.tracks.listOfTracksFromApi});
+    }
   }
 
   const position=e=>{
@@ -42,13 +59,14 @@ const Details = props => {
 
   return (
     <div className="SongDetails">
+
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/ >
-      <img className="Image" src = {props.details.album.images[0].url} alt = {props.artists[0]}></img>
+      <img className="Image" src = {props.tracks.selectedTrack.album.images[0].url} alt = {props.tracks.selectedTrack.artists[0]}></img>
       <div>
-        <label className="Name">{props.details.name}</label>
+        <label className="Name">{props.tracks.selectedTrack.name}</label>
       </div>
       <div>
-        <label className="Artist">{props.artists[0].name}</label>
+        <label className="Artist">{props.tracks.selectedTrack.artists[0].name}</label>
       </div>
 
       <div><input type="range" className="Seekbar" id="seekbar" min="0" max="1" step="0.001" defaultValue="0" onChange={position}/></div>

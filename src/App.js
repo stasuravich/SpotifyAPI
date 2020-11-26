@@ -19,9 +19,9 @@ function App() {
   const [logInfo, setLogInfo]=useState('');
   const [wrong, setWrong]=useState(false);
   const [playlists, setPlaylists] = useState({selectedPlaylist:'', listOfPlaylistsFromAPI: []});
+  const [playlistTrack, setPlaylistTrack]=useState();
   const [dispPlaylist, setDispPlaylist] = useState();
   const [tracks, setTracks] = useState({selectedTrack:'', listOfTracksFromApi: ''});
-  const [trackDetails, setTrackDetails] = useState();
   const [qPlaylist, setQPlaylist] = useState('');
   const [qOnline, setQOnline] = useState();
   const [searchRes, setSearchRes] = useState();
@@ -97,48 +97,34 @@ function App() {
     })
     .then (response => {
       setDispPlaylist(response.data.items);
-       //setTracks({listOfTracksFromApi: response.data.items})
     })};
 
   function request(device){
-
     axios(`https://api.spotify.com/v1/me/player/play?device_id=${device}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + logInfo
       },
-      data: {"context_uri": "spotify:playlist:"+[playlists.selectedPlaylist], "offset": {"uri": "spotify:track:"+tracks.selectedTrack}}
+      data: {"context_uri": "spotify:playlist:"+[playlistTrack], "offset": {"uri": "spotify:track:"+tracks.selectedTrack.id}}
     })
-  }
-
-  function curPlaying(){
-    axios('https://api.spotify.com/v1/me/player/currently-playing', {
-      method: 'GET',
-      headers: {'Authorization' : 'Bearer ' + logInfo}
-
-    })
-    .then(response=>{
-      setTrackDetails(response.data.item);
-
-    })
-    
   }
 
   useEffect(()=>{
     if(tracks.selectedTrack){
+      console.log("In tracks.selected")
       if(browser.name==='safari'){
         const currentTracks=[...tracks.listOfTracksFromApi]
         const currentTrack=currentTracks.filter(t=>t.track.id===tracks.selectedTrack)
-        setTrackDetails(currentTrack[0].track)
+        setTracks({selectedTrack: currentTrack[0].track, listOfTracksFromApi: tracks.listOfTracksFromApi})
 
       }
-
       player.connect();
       player.getCurrentState().then(state => {
         if(state) {
-          console.log("Get state selected track")
-          request(device)
+          if(state.track_window.current_track.id!==tracks.selectedTrack.id){
+            request(device)
+          }
         }
       });
       player.addListener('ready', ({device_id})=>{
@@ -146,30 +132,31 @@ function App() {
         setDevice(device_id);
         request(device_id);
       })
+      const interval = setInterval(() => {
+        player.getCurrentState().then(state => {
+          if(state){
+            if(state.track_window.current_track.id!==tracks.selectedTrack.id){
+              setTracks({selectedTrack: state.track_window.current_track, listOfTracksFromApi: tracks.listOfTracksFromApi});
+            }
+            console.log("Check state")
+            document.getElementById("seekbar").value= state.position/state.duration;
+
+
+          }
+        })
+      }, 1000);
+      return () => clearInterval(interval);
     }
 
   },[tracks.selectedTrack])
 
   useEffect(() => {
-    if(trackDetails && browser.name!=='safari'){
-      const interval = setInterval(() => {
-        player.getCurrentState().then(state => {
-          console.log("Get state trackDetails")
-          document.getElementById("seekbar").value= state.position/state.duration;
-          setDuration(state.duration)
-        })
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [trackDetails]);
-
-  useEffect(() => {
     if(player){
       player.on('player_state_changed', state => {
         if(state){
-          console.log(state)
           setPlaying(!state.paused);
-          curPlaying();
+          setDuration(state.duration);
+          console.log("In player")
         }
       });
     }
@@ -238,11 +225,13 @@ function App() {
       };
     }, [ref]);
   }
+
+
   return (
     <div className="App">
       {!logInfo ? <Login setLoggedIn={setLogInfo} wrong={wrong} setWrong={setWrong}/>:
       <div className="Container">
-        {playlists.selectedPlaylist && <Script url="https://sdk.scdn.co/spotify-player.js"/>}
+        {playlists.listOfPlaylistsFromAPI.length!==0 && <Script url="https://sdk.scdn.co/spotify-player.js"/>}
         <div className="Box1">
           <Search class="SearchPlaylist" placeh="Search playlist" setQuery={setQPlaylist} alerter = {() => {}}/>
           <Playlists items= {playlists.listOfPlaylistsFromAPI}  playlist={playlists.selectedPlaylist} changed = {playlistChanged}/>
@@ -250,8 +239,8 @@ function App() {
 
         </div>
         <div className="Box2">
-          {dispPlaylist && <Songs items = {search(dispPlaylist, qPlaylist)} setTracks = {setTracks} tracks={dispPlaylist} trackDeleted={trackDeleted} query={qPlaylist}/> }
-          {trackDetails && <Details details={trackDetails} artists = {trackDetails.artists} player= {player} playing={playing} access_token={logInfo} duration={duration} tracks={tracks}/>}
+          {dispPlaylist && <Songs items = {search(dispPlaylist, qPlaylist)} setTracks = {setTracks} tracks={dispPlaylist} trackDeleted={trackDeleted} query={qPlaylist} setPlaylistTrack ={setPlaylistTrack} playlists={playlists}/> }
+          {tracks.selectedTrack && <Details player= {player} playing={playing} access_token={logInfo} duration={duration} tracks={tracks} setTracks={setTracks}/>}
         </div>
       </div>}
 

@@ -4,7 +4,8 @@ import '../Css/Songs.css';
 const Songs = props=> {
   document.getElementsByClassName("SearchPlaylist")[0].style.visibility="visible";
   const clickSong= e=> {
-    props.setTracks({selectedTrack: e.target.id, listOfTracksFromApi: props.tracks});
+    props.setTracks({selectedTrack: props.items[e.target.id].track, listOfTracksFromApi: props.tracks});
+    props.setPlaylistTrack(props.playlists.selectedPlaylist);
   }
   const deleteSong= e=> {
     props.trackDeleted(e.currentTarget.value);
@@ -18,7 +19,7 @@ const Songs = props=> {
         <tbody>
           {props.items.map((item, idx) => (
             <tr key={idx}>
-              {<td className="ButtonsParent"><button className="SongsButton" onClick={clickSong} value = {item.track.uri} id={item.track.id}> {item.track.name}</button>
+              {<td className="ButtonsParent"><button className="SongsButton" onClick={clickSong} value = {item.track.uri} id={idx}> {item.track.name}</button>
                 <button className="DelButton" onClick={deleteSong} value={item.track.uri}>
                   <i className="fa fa-trash"></i><div className="DelMesage" >&nbsp;Delete</div></button>
               </td>}
