@@ -112,40 +112,34 @@ function App() {
 
   useEffect(()=>{
     if(tracks.selectedTrack){
-      console.log("In tracks.selected")
-      if(browser.name==='safari'){
-        const currentTracks=[...tracks.listOfTracksFromApi]
-        const currentTrack=currentTracks.filter(t=>t.track.id===tracks.selectedTrack)
-        setTracks({selectedTrack: currentTrack[0].track, listOfTracksFromApi: tracks.listOfTracksFromApi})
-
-      }
-      player.connect();
-      player.getCurrentState().then(state => {
-        if(state) {
-          if(state.track_window.current_track.id!==tracks.selectedTrack.id){
-            request(device)
-          }
-        }
-      });
-      player.addListener('ready', ({device_id})=>{
-
-        setDevice(device_id);
-        request(device_id);
-      })
-      const interval = setInterval(() => {
+      //console.log("In tracks.selected")
+      if(browser.name!=='safari'){
+        player.connect();
         player.getCurrentState().then(state => {
-          if(state){
+          if(state) {
             if(state.track_window.current_track.id!==tracks.selectedTrack.id){
-              setTracks({selectedTrack: state.track_window.current_track, listOfTracksFromApi: tracks.listOfTracksFromApi});
+              request(device)
             }
-            console.log("Check state")
-            document.getElementById("seekbar").value= state.position/state.duration;
-
-
           }
+        });
+        player.addListener('ready', ({device_id})=>{
+
+          setDevice(device_id);
+          request(device_id);
         })
-      }, 1000);
-      return () => clearInterval(interval);
+        const interval = setInterval(() => {
+          player.getCurrentState().then(state => {
+            if(state){
+              if(state.track_window.current_track.id!==tracks.selectedTrack.id){
+                setTracks({selectedTrack: state.track_window.current_track, listOfTracksFromApi: tracks.listOfTracksFromApi});
+              }
+              //console.log("Check state")
+              document.getElementById("seekbar").value= state.position/state.duration;
+            }
+          })
+        }, 1000);
+        return () => clearInterval(interval);
+      }
     }
 
   },[tracks.selectedTrack])
@@ -156,7 +150,7 @@ function App() {
         if(state){
           setPlaying(!state.paused);
           setDuration(state.duration);
-          console.log("In player")
+          //console.log("In player")
         }
       });
     }
