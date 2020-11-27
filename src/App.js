@@ -18,10 +18,12 @@ function App() {
 
   const [logInfo, setLogInfo]=useState('');
   const [wrong, setWrong]=useState(false);
+  const [userInfo, setUserInfo]=useState();
   const [playlists, setPlaylists] = useState({selectedPlaylist:'', listOfPlaylistsFromAPI: []});
   const [playlistTrack, setPlaylistTrack]=useState();
   const [dispPlaylist, setDispPlaylist] = useState();
   const [tracks, setTracks] = useState({selectedTrack:'', listOfTracksFromApi: ''});
+
   const [qPlaylist, setQPlaylist] = useState('');
   const [qOnline, setQOnline] = useState();
   const [searchRes, setSearchRes] = useState();
@@ -34,14 +36,13 @@ function App() {
   const [device, setDevice]=useState();
   const [duration, setDuration]=useState();
   //const params = getHashParams();
-
+  
   window.onSpotifyWebPlaybackSDKReady = () => {
     setPlayer(new window.Spotify.Player({      // Spotify is not defined until
       name: 'Spotify Web Player',            // the script is loaded in
       getOAuthToken: cb => {cb(logInfo)}
     }))
   }
-
 
   useEffect(()=> {
     if (logInfo){
@@ -57,6 +58,15 @@ function App() {
           setLogInfo(null)
           setWrong(true);
         })
+
+      axios('https://api.spotify.com/v1/me', {
+          method: 'GET',
+          headers: {'Authorization' : 'Bearer ' + logInfo}
+        })
+        .then((response) => {
+          setUserInfo(response.data);
+        })
+
       }
   }, [logInfo]);
 
@@ -86,35 +96,37 @@ function App() {
   //   }
   //   return hashParams;
   // }
+  async function getPlaylist(offset, curTracks, val){
+    await axios(`https://api.spotify.com/v1/playlists/${val}/tracks?offset=${offset}`, {
+      method: 'GET',
+      headers: {'Authorization' : 'Bearer ' + logInfo}
 
-  const playlistChanged = (val)=>{
-    function getPlaylist(offset, tracks){
-      axios(`https://api.spotify.com/v1/playlists/${val}/tracks?offset=${offset}`, {
-        method: 'GET',
-        headers: {'Authorization' : 'Bearer ' + logInfo}
+    })
+    .then (response => {
+      if(curTracks){
+        curTracks.push(...response.data.items);
+      }
+      else{
+        curTracks=response.data.items;
+      }
+      if(response.data.items.length===100){
+        curTracks= getPlaylist(offset+100, curTracks, val);
+      }
 
-      })
-      .then (response => {
-        if(tracks){
-          tracks.push(...response.data.items);
-        }
-        else{
-          tracks=response.data.items;
-        }
-        if(response.data.items.length===100){
-          getPlaylist(offset+100, tracks);
-        }
-        else{
-          setDispPlaylist(tracks);
-        }
-      })
-    }
+    })
+    return curTracks;
+
+  }
+
+  async function playlistChanged(val){
 
     setPlaylists({selectedPlaylist: val,
                   listOfPlaylistsFromAPI: playlists.listOfPlaylistsFromAPI})
     let offset=0;
-    let tracks;
-    getPlaylist(offset, tracks);
+    let curTracks;
+    curTracks = await getPlaylist(offset, curTracks, val);
+
+    setDispPlaylist(curTracks);
 
   };
 
@@ -187,22 +199,22 @@ function App() {
     });
   }
 
-  useEffect(()=>{
+  useEffect(async ()=>{
     if(addingTrack && addingId){
-      axios(`https://api.spotify.com/v1/playlists/${addingId}/tracks`, {
-        method: 'GET',
-        headers: {'Authorization' : 'Bearer ' + logInfo}
-      })
-      .then (response => {
-        for(const item of response.data.items){
+      if(!addSong){
+        let offset=0;
+        let curTracks=null;
+        curTracks = await getPlaylist(offset, curTracks, addingId);
+        for(const item of curTracks){
           if(item.track.uri===addingTrack){
             alert("Song already in the playlist")
             setAddingTrack(null)
             setAddingId(null)
           }
+          else if(item===curTracks[curTracks.length-1])
+            setAddSong(true);
         }
-        setAddSong(true)
-      });
+      }
       if(addSong){
         axios(`https://api.spotify.com/v1/playlists/${addingId}/tracks`, {
           method: "POST",
@@ -258,7 +270,7 @@ function App() {
       </div>}
 
       {onlineClicked && searchRes && <Online songs={searchRes} query={qOnline} playlists = {playlists.listOfPlaylistsFromAPI}
-        setAddingTrack={setAddingTrack}  setOnlineClicked={setOnlineClicked} setAddingId={setAddingId}/>}
+        setAddingTrack={setAddingTrack}  setOnlineClicked={setOnlineClicked} setAddingId={setAddingId} userInfo={userInfo}/>}
     </div>
   );
 
