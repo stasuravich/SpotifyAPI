@@ -17,7 +17,7 @@ const Online = props=> {
       <div className= "Online">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/ >
         {props.query && (props.songs.tracks.items.length ?
-          props.songs.tracks.items.map((item, idx) => idx<=15 &&
+          props.songs.tracks.items.map((item, idx) =>
             <div className="AddParent" key={idx}><button id="AddButton" value = {item.uri} onClick={seePlaylists} className="AddButton">
               <i className="fa fa-plus"></i><div className="AddMesage" >&nbsp;Add to playlist</div></button>{item.name}: {item.artists[0].name}</div>) :
             <div> '{props.query}' does not exist </div>)}
