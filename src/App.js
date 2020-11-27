@@ -62,7 +62,7 @@ function App() {
 
   useEffect(()=> {
     if(qOnline){
-      axios(`https://api.spotify.com/v1/search?type=track&q=${qOnline}`, {
+      axios(`https://api.spotify.com/v1/search?limit=15&type=track&q=${qOnline}`, {
           method: 'GET',
           headers: {'Authorization' : 'Bearer ' + logInfo}
         })
@@ -88,16 +88,35 @@ function App() {
   // }
 
   const playlistChanged = (val)=>{
+    function getPlaylist(offset, tracks){
+      axios(`https://api.spotify.com/v1/playlists/${val}/tracks?offset=${offset}`, {
+        method: 'GET',
+        headers: {'Authorization' : 'Bearer ' + logInfo}
+
+      })
+      .then (response => {
+        if(tracks){
+          tracks.push(...response.data.items);
+        }
+        else{
+          tracks=response.data.items;
+        }
+        if(response.data.items.length===100){
+          getPlaylist(offset+100, tracks);
+        }
+        else{
+          setDispPlaylist(tracks);
+        }
+      })
+    }
 
     setPlaylists({selectedPlaylist: val,
                   listOfPlaylistsFromAPI: playlists.listOfPlaylistsFromAPI})
-    axios(`https://api.spotify.com/v1/playlists/${val}/tracks`, {
-      method: 'GET',
-      headers: {'Authorization' : 'Bearer ' + logInfo}
-    })
-    .then (response => {
-      setDispPlaylist(response.data.items);
-    })};
+    let offset=0;
+    let tracks;
+    getPlaylist(offset, tracks);
+
+  };
 
   function request(device){
     axios(`https://api.spotify.com/v1/me/player/play?device_id=${device}`, {
