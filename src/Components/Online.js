@@ -23,7 +23,7 @@ const Online = props=> {
             <div> '{props.query}' does not exist </div>)}
       </div>
       <div className="PopUp">
-      {open && props.playlists.map((item, idx) =>
+      {open && props.playlists.map((item, idx) => props.userInfo.display_name===item.owner.display_name &&
         <button className="AddToPlay" key={idx} id = {item.id} onClick={addSong}>{item.name}</button>
       )}
       </div>
