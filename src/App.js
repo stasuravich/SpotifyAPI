@@ -36,7 +36,6 @@ function App() {
   const [device, setDevice]=useState();
   const [duration, setDuration]=useState();
   //const params = getHashParams();
-  
   window.onSpotifyWebPlaybackSDKReady = () => {
     setPlayer(new window.Spotify.Player({      // Spotify is not defined until
       name: 'Spotify Web Player',            // the script is loaded in
@@ -237,7 +236,7 @@ function App() {
   function Alerter(ref) {
     useEffect(() => {
       function handleClickInside(event){
-        if(ref.current.contains(event.target) || document.activeElement.id==="AddButton"){
+        if(ref.current.contains(event.target) || document.activeElement.className==="AddButton"){
           setOnlineClicked(true);
         }
         else{
@@ -269,7 +268,7 @@ function App() {
         </div>
       </div>}
 
-      {onlineClicked && searchRes && <Online songs={searchRes} query={qOnline} playlists = {playlists.listOfPlaylistsFromAPI}
+      {onlineClicked && searchRes && <Online songs={searchRes} query={qOnline} playlists = {playlists.listOfPlaylistsFromAPI} addingTrack={addingTrack}
         setAddingTrack={setAddingTrack}  setOnlineClicked={setOnlineClicked} setAddingId={setAddingId} userInfo={userInfo}/>}
     </div>
   );
