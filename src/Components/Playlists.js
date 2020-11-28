@@ -14,7 +14,8 @@ const Playlists = props=> {
       <label className="PlaylistLabel">Playlist: </label>
       <select className= "PlaylistsContent" onChange={dropdownChanged}>
         {!props.playlist &&<option key={0}>Select...</option>}
-        {props.items.map((item, idx) => <option key={idx + 1} value={item.id}>{item.name}</option>)}
+        {props.items.map((item, idx) => <option key={idx + 1} value={item.id}>{item.name}</option> )}
+
       </select>
 
     </div>

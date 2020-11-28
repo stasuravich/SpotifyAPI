@@ -75,7 +75,7 @@ const Details = props => {
       <button className="Pause" id="Pause" onClick={onPlayClick}>{props.playing ? <i className="fa fa-pause"></i>: <i className="fa fa-play"></i>}</button>
       <button className="Toggle" onClick={onNextClick}><i className="fa fa-forward"></i></button>
 
-      <div className="Volume"><i className="fa fa-volume-up"></i><input type="range" min="0" max="1" step="0.1" defaultValue="1" onChange={volume}/></div>
+      <div className="Volume"><i className="fa fa-volume-up"></i><input type="range" min="0" max="1" step="0.05" defaultValue="1" onChange={volume}/></div>
     </div>
   );
 }

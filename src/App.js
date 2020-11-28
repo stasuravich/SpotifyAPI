@@ -18,10 +18,12 @@ function App() {
 
   const [logInfo, setLogInfo]=useState('');
   const [wrong, setWrong]=useState(false);
+  const [userInfo, setUserInfo]=useState();
   const [playlists, setPlaylists] = useState({selectedPlaylist:'', listOfPlaylistsFromAPI: []});
   const [playlistTrack, setPlaylistTrack]=useState();
   const [dispPlaylist, setDispPlaylist] = useState();
   const [tracks, setTracks] = useState({selectedTrack:'', listOfTracksFromApi: ''});
+
   const [qPlaylist, setQPlaylist] = useState('');
   const [qOnline, setQOnline] = useState();
   const [searchRes, setSearchRes] = useState();
@@ -34,7 +36,6 @@ function App() {
   const [device, setDevice]=useState();
   const [duration, setDuration]=useState();
   //const params = getHashParams();
-
   window.onSpotifyWebPlaybackSDKReady = () => {
     setPlayer(new window.Spotify.Player({      // Spotify is not defined until
       name: 'Spotify Web Player',            // the script is loaded in
@@ -57,12 +58,21 @@ function App() {
           setLogInfo(null)
           setWrong(true);
         })
+
+      axios('https://api.spotify.com/v1/me', {
+          method: 'GET',
+          headers: {'Authorization' : 'Bearer ' + logInfo}
+        })
+        .then((response) => {
+          setUserInfo(response.data);
+        })
+
       }
   }, [logInfo]);
 
   useEffect(()=> {
     if(qOnline){
-      axios(`https://api.spotify.com/v1/search?type=track&q=${qOnline}`, {
+      axios(`https://api.spotify.com/v1/search?limit=15&type=track&q=${qOnline}`, {
           method: 'GET',
           headers: {'Authorization' : 'Bearer ' + logInfo}
         })
@@ -86,18 +96,39 @@ function App() {
   //   }
   //   return hashParams;
   // }
+  async function getPlaylist(offset, curTracks, val){
+    await axios(`https://api.spotify.com/v1/playlists/${val}/tracks?offset=${offset}`, {
+      method: 'GET',
+      headers: {'Authorization' : 'Bearer ' + logInfo}
 
-  const playlistChanged = (val)=>{
+    })
+    .then (response => {
+      if(curTracks){
+        curTracks.push(...response.data.items);
+      }
+      else{
+        curTracks=response.data.items;
+      }
+      if(response.data.items.length===100){
+        curTracks= getPlaylist(offset+100, curTracks, val);
+      }
+
+    })
+    return curTracks;
+
+  }
+
+  async function playlistChanged(val){
 
     setPlaylists({selectedPlaylist: val,
                   listOfPlaylistsFromAPI: playlists.listOfPlaylistsFromAPI})
-    axios(`https://api.spotify.com/v1/playlists/${val}/tracks`, {
-      method: 'GET',
-      headers: {'Authorization' : 'Bearer ' + logInfo}
-    })
-    .then (response => {
-      setDispPlaylist(response.data.items);
-    })};
+    let offset=0;
+    let curTracks;
+    curTracks = await getPlaylist(offset, curTracks, val);
+
+    setDispPlaylist(curTracks);
+
+  };
 
   function request(device){
     axios(`https://api.spotify.com/v1/me/player/play?device_id=${device}`, {
@@ -112,40 +143,34 @@ function App() {
 
   useEffect(()=>{
     if(tracks.selectedTrack){
-      console.log("In tracks.selected")
-      if(browser.name==='safari'){
-        const currentTracks=[...tracks.listOfTracksFromApi]
-        const currentTrack=currentTracks.filter(t=>t.track.id===tracks.selectedTrack)
-        setTracks({selectedTrack: currentTrack[0].track, listOfTracksFromApi: tracks.listOfTracksFromApi})
-
-      }
-      player.connect();
-      player.getCurrentState().then(state => {
-        if(state) {
-          if(state.track_window.current_track.id!==tracks.selectedTrack.id){
-            request(device)
-          }
-        }
-      });
-      player.addListener('ready', ({device_id})=>{
-
-        setDevice(device_id);
-        request(device_id);
-      })
-      const interval = setInterval(() => {
+      //console.log("In tracks.selected")
+      if(browser.name!=='safari'){
+        player.connect();
         player.getCurrentState().then(state => {
-          if(state){
+          if(state) {
             if(state.track_window.current_track.id!==tracks.selectedTrack.id){
-              setTracks({selectedTrack: state.track_window.current_track, listOfTracksFromApi: tracks.listOfTracksFromApi});
+              request(device)
             }
-            console.log("Check state")
-            document.getElementById("seekbar").value= state.position/state.duration;
-
-
           }
+        });
+        player.addListener('ready', ({device_id})=>{
+
+          setDevice(device_id);
+          request(device_id);
         })
-      }, 1000);
-      return () => clearInterval(interval);
+        const interval = setInterval(() => {
+          player.getCurrentState().then(state => {
+            if(state){
+              if(state.track_window.current_track.id!==tracks.selectedTrack.id){
+                setTracks({selectedTrack: state.track_window.current_track, listOfTracksFromApi: tracks.listOfTracksFromApi});
+              }
+              //console.log("Check state")
+              document.getElementById("seekbar").value= state.position/state.duration;
+            }
+          })
+        }, 1000);
+        return () => clearInterval(interval);
+      }
     }
 
   },[tracks.selectedTrack])
@@ -156,7 +181,7 @@ function App() {
         if(state){
           setPlaying(!state.paused);
           setDuration(state.duration);
-          console.log("In player")
+          //console.log("In player")
         }
       });
     }
@@ -174,22 +199,22 @@ function App() {
     });
   }
 
-  useEffect(()=>{
+  useEffect(async ()=>{
     if(addingTrack && addingId){
-      axios(`https://api.spotify.com/v1/playlists/${addingId}/tracks`, {
-        method: 'GET',
-        headers: {'Authorization' : 'Bearer ' + logInfo}
-      })
-      .then (response => {
-        for(const item of response.data.items){
+      if(!addSong){
+        let offset=0;
+        let curTracks=null;
+        curTracks = await getPlaylist(offset, curTracks, addingId);
+        for(const item of curTracks){
           if(item.track.uri===addingTrack){
             alert("Song already in the playlist")
             setAddingTrack(null)
             setAddingId(null)
           }
+          else if(item===curTracks[curTracks.length-1])
+            setAddSong(true);
         }
-        setAddSong(true)
-      });
+      }
       if(addSong){
         axios(`https://api.spotify.com/v1/playlists/${addingId}/tracks`, {
           method: "POST",
@@ -212,7 +237,7 @@ function App() {
   function Alerter(ref) {
     useEffect(() => {
       function handleClickInside(event){
-        if(ref.current.contains(event.target) || document.activeElement.id==="AddButton"){
+        if(ref.current.contains(event.target) || document.activeElement.className==="AddButton"){
           setOnlineClicked(true);
         }
         else{
@@ -244,8 +269,8 @@ function App() {
         </div>
       </div>}
 
-      {onlineClicked && searchRes && <Online songs={searchRes} query={qOnline} playlists = {playlists.listOfPlaylistsFromAPI}
-        setAddingTrack={setAddingTrack}  setOnlineClicked={setOnlineClicked} setAddingId={setAddingId}/>}
+      {onlineClicked && searchRes && <Online songs={searchRes} query={qOnline} playlists = {playlists.listOfPlaylistsFromAPI} addingTrack={addingTrack}
+        setAddingTrack={setAddingTrack}  setOnlineClicked={setOnlineClicked} setAddingId={setAddingId} userInfo={userInfo}/>}
     </div>
   );
 
