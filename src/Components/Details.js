@@ -14,7 +14,6 @@ const Details = props => {
     return -1;
   }
   function onPrevClick(){
-
     if(props.tracks.listOfTracksFromApi[0].track.name===props.tracks.selectedTrack.name){
       props.player.seek(0);
     }

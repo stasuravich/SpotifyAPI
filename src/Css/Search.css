@@ -1,10 +1,12 @@
 .SearchPlaylist{
+  padding-top: 10px;
   order: 1;
   padding-left: 250px;
   visibility: hidden;
 }
 
 .SearchOnline{
+  padding-top: 10px;
   order: 3;
   padding-right: 250px;
 }

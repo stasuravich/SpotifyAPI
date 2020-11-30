@@ -22,8 +22,19 @@
   text-align:left;
   font-size: 18px;
 }
+.SongsButtonSelected{
+  position:relative;
+  width:510px;
+  text-align:left;
+  font-size: 18px;
+  border-color: #757372;
+  background-color: #D7D7D7;
+  outline: none;
+  left: 10px;
+}
 .ButtonsParent{
   position: relative;
+
 }
 
 .DelMesage{
