@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import './App.css';
 //import SpotifyWeb from 'spotify-web-api-js';
 import Script from 'react-load-script';
@@ -34,6 +34,7 @@ function App() {
   const [device, setDevice]=useState();
   const [duration, setDuration]=useState();
   const [open, setOpen]=useState(false);
+  const inputRef = useRef();
   //const params = getHashParams();
   window.onSpotifyWebPlaybackSDKReady = () => {
     setPlayer(new window.Spotify.Player({      // Spotify is not defined until
@@ -245,17 +246,16 @@ function App() {
     }
   }, [addingTrack, addingId, addSong])
 
-  function Alerter(ref) {
-    useEffect(() => {
-
-      function handleClickInside(event){
-        if(ref.current.contains(event.target) || document.activeElement.className==="AddButton"){
+  useEffect(() => {
+    if(inputRef.current){
+      const handleClickInside = event=>{
+        if(inputRef.current.contains(event.target) || document.activeElement.className==="AddButton"){
           setOnlineClicked(true);
         }
         else{
           setOnlineClicked(false);
         }
-        if(!open && ref.current.contains(event.target)){
+        if(!open && inputRef.current.contains(event.target)){
           setOpen(open);
         }
       }
@@ -263,18 +263,18 @@ function App() {
       return () => {
         document.removeEventListener("click", handleClickInside);
       };
-    }, [ref]);
-  }
+    }
+  }, [inputRef.current])
 
   return (
     <div className="App">
-      {!logInfo ? <Login setLoggedIn={setLogInfo} wrong={wrong} setWrong={setWrong}/>:
+      {!userInfo ? <Login setLoggedIn={setLogInfo} wrong={wrong} setWrong={setWrong}/>:
       <div className="Container">
         {playlists.listOfPlaylistsFromAPI.length!==0 && <Script url="https://sdk.scdn.co/spotify-player.js"/>}
         <div className="Box1">
-          <Search class="SearchPlaylist" placeh="Search playlist" setQuery={setQPlaylist} alerter = {() => {}}/>
+          <Search class="SearchPlaylist" placeh="Search playlist" setQuery={setQPlaylist}/>
           <Playlists items= {playlists.listOfPlaylistsFromAPI}  playlist={playlists.selectedPlaylist} changed = {playlistChanged}/>
-          <Search class="SearchOnline" placeh="Search for a song..." setQuery={setQOnline} alerter = {Alerter}/>
+          <Search class="SearchOnline" placeh="Search for a song..." setQuery={setQOnline}  inputRef={inputRef}/>
         </div>
         <div className="Box2">
           {dispPlaylist && <Songs items = {search(dispPlaylist, qPlaylist)} tracks={tracks} setTracks = {setTracks} dispPlaylist={dispPlaylist} trackDeleted={trackDeleted} query={qPlaylist} setPlaylistTrack ={setPlaylistTrack} playlists={playlists} player={player}/> }
