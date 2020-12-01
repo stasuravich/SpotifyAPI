@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef, useCallback} from 'react';
 import './App.css';
 //import SpotifyWeb from 'spotify-web-api-js';
 import Script from 'react-load-script';
@@ -27,13 +27,15 @@ function App() {
   const [searchRes, setSearchRes] = useState();
   const [addingTrack, setAddingTrack]=useState();
   const [onlineClicked, setOnlineClicked]=useState(false);
-  const [playing, setPlaying]=useState();
+
   const [player, setPlayer]=useState();
   const [addingId, setAddingId]=useState();
   const [addSong, setAddSong]= useState(false);
-  const [device, setDevice]=useState();
-  const [duration, setDuration]=useState();
+
   const [open, setOpen]=useState(false);
+  //const onlineClicked=useRef(false);
+  //const open=useRef(false);
+  const device=useRef();
   const inputRef = useRef();
   //const params = getHashParams();
   window.onSpotifyWebPlaybackSDKReady = () => {
@@ -57,6 +59,11 @@ function App() {
           setLogInfo(null)
           setWrong(true);
         })
+    }
+  }, [logInfo]);
+
+  useEffect(()=> {
+    if(userInfo){
       axios('https://api.spotify.com/v1/me/playlists', {
           method: 'GET',
           headers: {'Authorization' : 'Bearer ' + logInfo}
@@ -64,8 +71,8 @@ function App() {
         .then((response) => {
           setPlaylists({listOfPlaylistsFromAPI: response.data.items});
         })
-      }
-  }, [logInfo]);
+    }
+  }, [userInfo])
 
   useEffect(()=> {
     if(qOnline){
@@ -111,14 +118,16 @@ function App() {
     return curTracks;
   }
 
-  async function playlistChanged(val){
+  const playlistChanged=useCallback(async (val)=>{
+    //console.log("In playlist changed")
     setPlaylists({selectedPlaylist: val,
                   listOfPlaylistsFromAPI: playlists.listOfPlaylistsFromAPI})
     let offset=0;
     let curTracks;
     curTracks = await getPlaylist(offset, curTracks, val);
     setDispPlaylist(curTracks);
-  };
+  }, [playlists.selectedPlaylist]);
+
   function request(device){
     axios(`https://api.spotify.com/v1/me/player/play?device_id=${device}`, {
       method: 'PUT',
@@ -130,7 +139,6 @@ function App() {
     })
   }
 
-
   useEffect(()=>{
     if(tracks.selectedTrack){
       //console.log("In tracks.selected")
@@ -139,12 +147,12 @@ function App() {
         player.getCurrentState().then(state => {
           if(state) {
             if(state.track_window.current_track.name!==tracks.selectedTrack.name || state.track_window.current_track.artists[0].name!==tracks.selectedTrack.artists[0].name){
-              request(device)
+              request(device.current)
             }
           }
         });
-        player.addListener('ready', ({device_id})=>{
-          setDevice(device_id);
+        player.addListener('ready',({device_id})=>{
+          device.current=device_id;
           request(device_id);
         })
         const interval = setInterval(() => {
@@ -163,20 +171,7 @@ function App() {
     }
   },[tracks.selectedTrack])
 
-  useEffect(() => {
-    if(player){
-      player.on('player_state_changed', state => {
-
-        if(state){
-          setPlaying(!state.paused);
-          setDuration(state.duration);
-          //console.log("In player")
-        }
-      });
-    }
-  }, [player]);
-
-  function trackDeleted(uri){
+  const trackDeleted=uri=>{
     axios(`https://api.spotify.com/v1/playlists/${playlists.selectedPlaylist}/tracks`, {
       method: "DELETE",
       headers: {'Authorization' : 'Bearer ' + logInfo},
@@ -191,7 +186,7 @@ function App() {
         setTracks({selectedTrack: tracks.selectedTrack, listOfTracksFromApi: curTracks});
       }
     });
-  }
+  };
 
   async function checkExistence(){
     if(!addSong){
@@ -240,6 +235,7 @@ function App() {
     setAddingId(null)
     setAddSong(false);
   }
+
   useEffect( ()=>{
     if(addingTrack && addingId){
       checkExistence();
@@ -250,9 +246,11 @@ function App() {
     if(inputRef.current){
       const handleClickInside = event=>{
         if(inputRef.current.contains(event.target) || document.activeElement.className==="AddButton"){
+          //onlineClicked.current=true;
           setOnlineClicked(true);
         }
         else{
+          //onlineClicked.current=false;
           setOnlineClicked(false);
         }
         if(!open && inputRef.current.contains(event.target)){
@@ -273,12 +271,12 @@ function App() {
         {playlists.listOfPlaylistsFromAPI.length!==0 && <Script url="https://sdk.scdn.co/spotify-player.js"/>}
         <div className="Box1">
           <Search class="SearchPlaylist" placeh="Search playlist" setQuery={setQPlaylist}/>
-          <Playlists items= {playlists.listOfPlaylistsFromAPI}  playlist={playlists.selectedPlaylist} changed = {playlistChanged}/>
+          {playlists.listOfPlaylistsFromAPI.length!==0 && <Playlists playlists= {playlists} changed = {playlistChanged}/>}
           <Search class="SearchOnline" placeh="Search for a song..." setQuery={setQOnline}  inputRef={inputRef}/>
         </div>
         <div className="Box2">
           {dispPlaylist && <Songs items = {search(dispPlaylist, qPlaylist)} tracks={tracks} setTracks = {setTracks} dispPlaylist={dispPlaylist} trackDeleted={trackDeleted} query={qPlaylist} setPlaylistTrack ={setPlaylistTrack} playlists={playlists} player={player}/> }
-          {tracks.selectedTrack && <Details player= {player} playing={playing} access_token={logInfo} duration={duration} tracks={tracks} setTracks={setTracks}/>}
+          {tracks.selectedTrack && <Details player= {player}  access_token={logInfo} tracks={tracks} setTracks={setTracks}/>}
         </div>
       </div>}
       {onlineClicked && searchRes && <Online songs={searchRes} query={qOnline} playlists = {playlists.listOfPlaylistsFromAPI} addingTrack={addingTrack} setAddingTrack={setAddingTrack}  setOnlineClicked={setOnlineClicked} setAddingId={setAddingId} userInfo={userInfo} open={open} setOpen={setOpen}/>}

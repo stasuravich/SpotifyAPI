@@ -1,8 +1,23 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import '../Css/Details.css';
 import axios from 'axios'
 
 const Details = props => {
+  const [playing, setPlaying]=useState();
+  const [duration, setDuration]=useState();
+  useEffect(() => {
+    if(props.player){
+      props.player.on('player_state_changed', state => {
+
+        if(state){
+          setPlaying(!state.paused);
+          setDuration(state.duration);
+          //console.log("In player")
+        }
+      });
+    }
+  }, [props.player]);
+
   const compute = _ =>{
     let count=0;
     for(const elem of props.tracks.listOfTracksFromApi.entries()){
@@ -46,7 +61,7 @@ const Details = props => {
   }
 
   const position=e=>{
-    props.player.seek(props.duration*e.target.value);
+    props.player.seek(duration*e.target.value);
   }
 
   const volume=e=>{
@@ -71,7 +86,7 @@ const Details = props => {
       <div><input type="range" className="Seekbar" id="seekbar" min="0" max="1" step="0.001" defaultValue="0" onChange={position}/></div>
 
       <button className="Toggle" onClick={onPrevClick}><i className="fa fa-backward"></i></button>
-      <button className="Pause" id="Pause" onClick={onPlayClick}>{props.playing ? <i className="fa fa-pause"></i>: <i className="fa fa-play"></i>}</button>
+      <button className="Pause" id="Pause" onClick={onPlayClick}>{playing ? <i className="fa fa-pause"></i>: <i className="fa fa-play"></i>}</button>
       <button className="Toggle" onClick={onNextClick}><i className="fa fa-forward"></i></button>
 
       <div className="Volume"><i className="fa fa-volume-up"></i><input type="range" min="0" max="1" step="0.05" defaultValue="1" onChange={volume}/></div>

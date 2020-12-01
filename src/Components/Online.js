@@ -1,7 +1,7 @@
-import React from 'react';
+import React, {memo} from 'react';
 import '../Css/Online.css';
 
-const Online = props=> {
+const Online = memo(props=> {
 
   const seePlaylists=e=>{
     document.getElementById("PopUp").style.marginTop=e.currentTarget.id+"px";
@@ -34,5 +34,5 @@ const Online = props=> {
       </div>
     </div>
   );
-}
+})
 export default Online;

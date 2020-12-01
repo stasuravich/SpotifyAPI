@@ -1,16 +1,17 @@
-import React from 'react';
+import React, {memo} from 'react';
 import '../Css/Songs.css';
 
-const Songs = props=> {
-
+const Songs = memo(props=>{
+  //console.log("SongsComponent");
   document.getElementsByClassName("SearchPlaylist")[0].style.visibility="visible";
+
   function setColor(artist, name){
     if(props.tracks.selectedTrack.name===name && props.tracks.selectedTrack.artists[0].name===artist){
-      //console.log("match");
       return "SongsButtonSelected";
     }
     return "SongsButton";
   }
+
   const clickSong= e=> {
     if(e.target.id===props.tracks.selectedTrack.id){
       props.player.seek(0);
@@ -20,6 +21,7 @@ const Songs = props=> {
       props.setPlaylistTrack(props.playlists.selectedPlaylist);
     }
   }
+
   const deleteSong= e=> {
     props.trackDeleted(e.currentTarget.value);
   }
@@ -43,6 +45,6 @@ const Songs = props=> {
       </table>
     </div>
   );
-}
+})
 
 export default Songs;
