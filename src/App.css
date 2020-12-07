@@ -1,21 +1,15 @@
-.Container {
+.Box{
+  position: relative;
   text-align: center;
-
-}
-.Box1 {
   display: flex;
-  position: sticky;
-  top: 0;
-  background: #E8E8E8;
-  height: 60px;
-  z-index: 10;
-}
-
-.Box2{
-  display: flex;
+  top: 70px;
+  z-index: 0;
+  max-width: 100%;
 }
 
 div{
   margin: 5px;
+  margin-left:auto;
+  margin-right:auto;
 
 }

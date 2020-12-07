@@ -1,22 +1,20 @@
-import React, {useState} from 'react';
+import React, {useState, useRef, memo} from 'react';
 import '../Css/Login.css';
 import logo from '../logos/adrian-korte-5gn2soeAc40-unsplash.jpg';
 
-const Login =props=>{
-
-  const [token, setToken]=useState();
-
+const Login =memo(props=>{
+  const token=useRef();
+//  console.log("In Login");
 
   const submit=e =>{
     e.preventDefault();
-    if(token){
-      props.setLoggedIn(token);
+    if(token.current){
+      props.setLoggedIn(token.current);
     }
     else{
       props.setWrong(true);
     }
   }
-
 
   return (
     <div className="Login">
@@ -29,7 +27,7 @@ const Login =props=>{
           </a>):
         </label>
         <br/>
-        <input className="TokenInput" type="text" placeholder="spotify token" onChange={e=> setToken(e.target.value)} defaultValue =''/>
+        <input className="TokenInput" type="text" placeholder="spotify token" onChange={e=> token.current=e.target.value} defaultValue =''/>
         <br/><br/>
         <button type = "submit" >Submit</button>
       </form>
@@ -38,6 +36,6 @@ const Login =props=>{
       }
     </div>
   );
-}
+});
 
 export default Login;
