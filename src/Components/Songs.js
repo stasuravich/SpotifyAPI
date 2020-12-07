@@ -1,11 +1,11 @@
-import React, {memo} from 'react';
+import React, {memo, useMemo} from 'react';
 import '../Css/Songs.css';
 import axios from 'axios';
 
 const Songs = memo(props=>{
   let curTracks;
   //console.log("SongsComponent");
-  document.getElementsByClassName("SearchPlaylist")[0].style.visibility="visible";
+  document.getElementsByClassName("SearchPlaylist")[0].style.visibility=useMemo(()=>"visible", [props.playlists.current.listOfPlaylistsFromAPI]);
 
   const search=(rows, query)=>{
     return rows.filter(row=>row.track.name.toLowerCase().indexOf(query.toLowerCase()) > -1)
@@ -27,20 +27,20 @@ const Songs = memo(props=>{
     }
     else{
       props.setTracks({selectedTrack: search(props.dispPlaylist, props.query)[e.target.value].track, listOfTracksFromApi: props.dispPlaylist});
-      props.playlistTrack.current=props.playlists.selectedPlaylist;
+      props.playlistTrack.current=props.playlists.current.selectedPlaylist;
     }
   };
 
   const deleteSong= e=>{
-    axios(`https://api.spotify.com/v1/playlists/${props.playlists.selectedPlaylist}/tracks`, {
+    axios(`https://api.spotify.com/v1/playlists/${props.playlists.current.selectedPlaylist}/tracks`, {
       method: "DELETE",
       headers: {'Authorization' : 'Bearer ' + props.logInfo},
       data: { "tracks": [{"uri": e.currentTarget.value}]}
     })
     .then (async _ => {
-      curTracks = await props.getPlaylist(0, curTracks, props.playlists.selectedPlaylist);
+      curTracks = await props.getPlaylist(0, curTracks, props.playlists.current.selectedPlaylist);
       props.setDispPlaylist(curTracks);
-      if(props.playlistTrack.current===props.playlists.selectedPlaylist){
+      if(props.playlistTrack.current===props.playlists.current.selectedPlaylist){
         props.setTracks({selectedTrack: props.tracks.selectedTrack, listOfTracksFromApi: curTracks});
       }
     });

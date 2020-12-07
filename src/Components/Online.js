@@ -62,9 +62,9 @@ const Online = memo(props=> {
         })
         .then (async _ => {
           curTracks = await props.getPlaylist(0, curTracks, addingId);
-          if(addingId===props.playlists.selectedPlaylist){
+          if(addingId===props.playlists.current.selectedPlaylist){
             props.setDispPlaylist(curTracks);
-            if(props.playlistTrack.current===props.playlists.selectedPlaylist){
+            if(props.playlistTrack.current===props.playlists.current.selectedPlaylist){
               props.setTracks({selectedTrack: props.tracks.selectedTrack, listOfTracksFromApi: curTracks});
             }
           }
@@ -101,7 +101,7 @@ const Online = memo(props=> {
           <div> '{props.songs}' does not exist </div>}
       </div>
       <div id ="PopUp" className="PopUp">
-      {open && props.playlists.listOfPlaylistsFromAPI.map((item, idx) => userInfo.current.display_name===item.owner.display_name &&
+      {open && props.playlists.current.listOfPlaylistsFromAPI.map((item, idx) => userInfo.current.display_name===item.owner.display_name &&
         <button className="AddToPlay" key={idx} id = {item.id} onClick={addTheSong}>{item.name}</button>
       )}
       </div>

@@ -15,8 +15,8 @@ import axios from 'axios';
 function App() {
   //console.log("In App");
   const [logInfo, setLogInfo]=useState('');
-  const [wrong, setWrong]=useState(false);
-  const [playlists, setPlaylists] = useState({selectedPlaylist:'', listOfPlaylistsFromAPI: []});
+  const [cred, setCred]=useState();
+  const playlists = useRef({selectedPlaylist:'', listOfPlaylistsFromAPI: []});
   const [dispPlaylist, setDispPlaylist] = useState();
   const [tracks, setTracks] = useState({selectedTrack:'', listOfTracksFromApi: ''});
   const [qPlaylist, setQPlaylist] = useState('');
@@ -31,10 +31,11 @@ function App() {
           headers: {'Authorization' : 'Bearer ' + logInfo}
         })
         .then((response) => {
-          setPlaylists({listOfPlaylistsFromAPI: response.data.items});
+          playlists.current={listOfPlaylistsFromAPI: response.data.items};
+          setCred("right");
         })
         .catch(_=>{
-            setWrong(true);
+            setCred("wrong");
           })
     }
   }, [logInfo]);
@@ -70,11 +71,11 @@ function App() {
 
   return (
     <div className="App">
-      {!playlists.listOfPlaylistsFromAPI.length ? <Login setLoggedIn={setLogInfo} wrong={wrong} setWrong={setWrong}/>:
+      {(!cred || cred==="wrong") ? <Login setLoggedIn={setLogInfo} cred={cred} setCred={setCred}/>:
       <>
         <Search class="SearchPlaylist" placeh="Search playlist" setQuery={setQPlaylist}/>
         <SearchAndSearchRes logInfo={logInfo} playlists={playlists} getPlaylist={getPlaylist} playlistTrack={playlistTrack} setTracks={setTracks} tracks={tracks} setDispPlaylist={setDispPlaylist}/>
-        <Playlists playlists= {playlists} setDispPlaylist={setDispPlaylist} getPlaylist={getPlaylist} setPlaylists={setPlaylists} />
+        <Playlists playlists= {playlists} setDispPlaylist={setDispPlaylist} getPlaylist={getPlaylist} />
         <div className="Box">
           {dispPlaylist && <Songs logInfo={logInfo} playlists={playlists} tracks={tracks} setTracks = {setTracks} playlistTrack={playlistTrack} dispPlaylist={dispPlaylist} setDispPlaylist={setDispPlaylist} query={qPlaylist} getPlaylist={getPlaylist}/> }
           {tracks.selectedTrack && <Details access_token={logInfo} tracks={tracks} setTracks={setTracks} playlistTrack={playlistTrack}/>}

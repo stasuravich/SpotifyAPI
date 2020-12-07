@@ -1,4 +1,4 @@
-import React, {useState, useRef, memo} from 'react';
+import React, {useRef, memo} from 'react';
 import '../Css/Login.css';
 import logo from '../logos/adrian-korte-5gn2soeAc40-unsplash.jpg';
 
@@ -12,7 +12,7 @@ const Login =memo(props=>{
       props.setLoggedIn(token.current);
     }
     else{
-      props.setWrong(true);
+      props.setCred("wrong");
     }
   }
 
@@ -31,7 +31,7 @@ const Login =memo(props=>{
         <br/><br/>
         <button type = "submit" >Submit</button>
       </form>
-      {props.wrong &&
+      {props.cred==="wrong" &&
         <div className="Wrong"> Invalid token, please try again</div>
       }
     </div>

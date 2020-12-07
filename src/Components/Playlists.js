@@ -6,8 +6,8 @@ const Playlists = memo(props=> {
   let curTracks;
 
   const dropdownChanged = async e => {
-    props.setPlaylists({selectedPlaylist: e.target.value,
-                  listOfPlaylistsFromAPI: props.playlists.listOfPlaylistsFromAPI});
+    props.playlists.current={selectedPlaylist: e.target.value,
+                  listOfPlaylistsFromAPI: props.playlists.current.listOfPlaylistsFromAPI};
     curTracks = await props.getPlaylist(0, curTracks, e.target.value);
     props.setDispPlaylist(curTracks);
   };
@@ -16,8 +16,8 @@ const Playlists = memo(props=> {
     <div className= "Playlists">
       <label className="PlaylistLabel">Playlist: </label>
       <select className= "PlaylistsContent" onChange={dropdownChanged}>
-        {!props.playlists.selectedPlaylist &&<option key={0}>Select...</option>}
-        {props.playlists.listOfPlaylistsFromAPI.map((item, idx) => <option key={idx + 1} value={item.id}>{item.name}</option> )}
+        {!props.playlists.current.selectedPlaylist &&<option key={0}>Select...</option>}
+        {props.playlists.current.listOfPlaylistsFromAPI.map((item, idx) => <option key={idx + 1} value={item.id}>{item.name}</option> )}
 
       </select>
 

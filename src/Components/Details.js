@@ -109,7 +109,7 @@ const Details = memo(props => {
   }
 
   const volume=e=>{
-    axios('https://api.spotify.com/v1/me/player/volume?volume_percent='+e.target.value*100, {
+    axios('https://api.spotify.com/v1/me/player/volume?volume_percent='+Math.round(e.target.value*100), {
       method: 'PUT',
       headers: {'Authorization' : 'Bearer ' + props.access_token}
     })
