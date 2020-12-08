@@ -19,6 +19,8 @@ const Songs = memo(props=>{
   }
 
   const clickSong= e=> {
+    if(!props.playing)
+      props.setPlaying(true);
     if(e.target.id===props.tracks.selectedTrack.id){
       axios(`https://api.spotify.com/v1/me/player/seek?position_ms=${0}`, {
         method: "PUT",

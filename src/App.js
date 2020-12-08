@@ -19,6 +19,7 @@ function App() {
   const playlists = useRef({selectedPlaylist:'', listOfPlaylistsFromAPI: []});
   const [dispPlaylist, setDispPlaylist] = useState();
   const [tracks, setTracks] = useState({selectedTrack:'', listOfTracksFromApi: ''});
+  const [playing, setPlaying]=useState(true);
   const [qPlaylist, setQPlaylist] = useState('');
   const playlistTrack=useRef();
   //const params = getHashParams();
@@ -76,8 +77,8 @@ function App() {
         <SearchAndSearchRes logInfo={logInfo} playlists={playlists} getPlaylist={getPlaylist} playlistTrack={playlistTrack} setTracks={setTracks} tracks={tracks} setDispPlaylist={setDispPlaylist}/>
         <Playlists playlists= {playlists} setDispPlaylist={setDispPlaylist} getPlaylist={getPlaylist} />
         <div className="Box">
-          {dispPlaylist && <Songs logInfo={logInfo} playlists={playlists} tracks={tracks} setTracks = {setTracks} playlistTrack={playlistTrack} dispPlaylist={dispPlaylist} setDispPlaylist={setDispPlaylist} query={qPlaylist} getPlaylist={getPlaylist}/> }
-          {tracks.selectedTrack && <Details access_token={logInfo} tracks={tracks} setTracks={setTracks} playlistTrack={playlistTrack}/>}
+          {dispPlaylist && <Songs logInfo={logInfo} playlists={playlists} tracks={tracks} setTracks = {setTracks} playlistTrack={playlistTrack} dispPlaylist={dispPlaylist} setDispPlaylist={setDispPlaylist} query={qPlaylist} getPlaylist={getPlaylist} playing={playing} setPlaying={setPlaying}/> }
+          {tracks.selectedTrack && <Details access_token={logInfo} tracks={tracks} setTracks={setTracks} playlistTrack={playlistTrack} playing={playing} setPlaying={setPlaying}/>}
         </div>
       </>}
     </div>

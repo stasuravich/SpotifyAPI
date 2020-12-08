@@ -24,20 +24,22 @@ const Online = memo(props=> {
     const handleClickInside = event=>{
       if(open && props.inputRef.current.contains(event.target)){
         setOpen(false);
+      }
+      else if(props.inputRef.current.contains(event.target)){
         setOnlineClicked(true);
       }
-      else if(props.inputRef.current.contains(event.target) || document.activeElement.className==="AddButton"){
-        setOnlineClicked(true);
-      }
-      else{
+      else if (document.activeElement.className!=="AddButton"){
         setOnlineClicked(false);
+        if(open){
+          setOpen(false);
+        }
       }
     }
     document.addEventListener("click", handleClickInside);
     return () => {
       document.removeEventListener("click", handleClickInside);
     };
-  }, [props.inputRef, open])
+  }, [open])
 
   const addSongClicked=async addingId=>{
     let addSong=false;

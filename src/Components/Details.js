@@ -7,7 +7,6 @@ const browser=detect();
 
 const Details = memo(props => {
   //console.log("Details Component");
-  const [playing, setPlaying]=useState();
   const [player, setPlayer]=useState();
   const duration = useRef();
   const device=useRef();
@@ -33,7 +32,6 @@ const Details = memo(props => {
     if(player && browser.name!=='safari'){
       player.on('player_state_changed', state => {
         if(state){
-          setPlaying(!state.paused);
           duration.current=state.duration;
         }
       });
@@ -62,7 +60,7 @@ const Details = memo(props => {
       }, 1000);
       return () => clearInterval(interval);
     }
-  },[props.tracks.selectedTrack, window.onSpotifyWebPlaybackSDKReady])
+  },[window.onSpotifyWebPlaybackSDKReady])
 
   const compute = _ =>{
     let count=0;
@@ -91,6 +89,10 @@ const Details = memo(props => {
   };
 
   const onPlayClick=_=>{
+    if(props.playing)
+      props.setPlaying(false);
+    else
+      props.setPlaying(true);
     player.togglePlay();
   };
 
@@ -128,7 +130,7 @@ const Details = memo(props => {
       </div>
       <div><input type="range" className="Seekbar" id="seekbar" min="0" max="1" step="0.001" defaultValue="0" onChange={position}/></div>
       <button className="Toggle" onClick={onPrevClick}><i className="fa fa-backward"></i></button>
-      <button className="Pause" id="Pause" onClick={onPlayClick}>{playing ? <i className="fa fa-pause"></i>: <i className="fa fa-play"></i>}</button>
+      <button className="Pause" id="Pause" onClick={onPlayClick}>{props.playing ? <i className="fa fa-pause"></i>: <i className="fa fa-play"></i>}</button>
       <button className="Toggle" onClick={onNextClick}><i className="fa fa-forward"></i></button>
       <div className="Volume"><i className="fa fa-volume-up"></i><input type="range" min="0" max="1" step="0.05" defaultValue="1" onChange={volume}/></div>
     </div>
