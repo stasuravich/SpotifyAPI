@@ -4,11 +4,11 @@ import axios from 'axios';
 
 const Online = memo(props=> {
   //console.log("Online Component");
-  const [addSong, setAddSong]= useState(false);
   const [addingId, setAddingId]=useState();
-  const addingTrack=useRef();
   const [open, setOpen]=useState(false);
   const [onlineClicked, setOnlineClicked]=useState(false);
+  const addingTrack=useRef();
+  const addSong=useRef(false);
   const userInfo=useRef();
   let curTracks;
 
@@ -43,18 +43,21 @@ const Online = memo(props=> {
 
   useEffect(async ()=>{
     if(addingId){
-      if(!addSong){
+      if(!addSong.current){
         curTracks = await props.getPlaylist(0, curTracks, addingId);
         for(const item of curTracks){
           if(item.track.uri===addingTrack.current){
             alert("Song already in the playlist")
-            setAddingId(null)
+            setAddingId(null);
+            break;
           }
-          else if(item===curTracks[curTracks.length-1])
-            setAddSong(true);
+          else if(item===curTracks[curTracks.length-1]){
+            addSong.current=true;
+          }
         }
       }
-      if(addSong){
+      if(addSong.current){
+        curTracks=null;
         axios(`https://api.spotify.com/v1/playlists/${addingId}/tracks`, {
           method: "POST",
           headers: {'Authorization' : 'Bearer ' + props.logInfo},
@@ -72,11 +75,11 @@ const Online = memo(props=> {
             props.setTracks({selectedTrack: props.tracks.selectedTrack, listOfTracksFromApi: curTracks});
           }
         })
-        setAddSong(false);
+        addSong.current=false;
         setAddingId(null);
       }
     }
-  }, [addingId, addSong])
+  }, [addingId])
 
   const seePlaylists=e=>{
     document.getElementById("PopUp").style.marginTop=e.currentTarget.id+"px";

@@ -40,7 +40,6 @@ function App() {
     }
   }, [logInfo]);
 
-
   // function getHashParams() {
   //   var hashParams = {};
   //   var e, r = /([^&;=]+)=?([^&;]*)/g,
