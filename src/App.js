@@ -1,5 +1,6 @@
 import React, {useState, useEffect, useRef} from 'react';
 import './App.css';
+//import Script from 'react-load-script';
 //import SpotifyWeb from 'spotify-web-api-js';
 import Playlists from './Components/Playlists';
 import Songs from './Components/Songs';

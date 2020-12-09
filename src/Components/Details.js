@@ -11,6 +11,13 @@ const Details = memo(props => {
   const duration = useRef();
   const device=useRef();
 
+  window.onSpotifyWebPlaybackSDKReady = () => {
+    setPlayer(new window.Spotify.Player({      // Spotify is not defined until
+      name: 'Spotify Web Player',            // the script is loaded in
+      getOAuthToken: cb => {cb(props.access_token)}
+    }))
+  }
+
   const request=device=>{
     axios(`https://api.spotify.com/v1/me/player/play?device_id=${device}`, {
       method: 'PUT',
@@ -23,12 +30,6 @@ const Details = memo(props => {
   }
 
   useEffect(()=>{
-    window.onSpotifyWebPlaybackSDKReady = () => {
-      setPlayer(new window.Spotify.Player({      // Spotify is not defined until
-        name: 'Spotify Web Player',            // the script is loaded in
-        getOAuthToken: cb => {cb(props.access_token)}
-      }))
-    }
     if(player && browser.name!=='safari'){
       player.on('player_state_changed', state => {
         if(state){
@@ -60,7 +61,7 @@ const Details = memo(props => {
       }, 1000);
       return () => clearInterval(interval);
     }
-  },[window.onSpotifyWebPlaybackSDKReady])
+  })
 
   const compute = _ =>{
     let count=0;

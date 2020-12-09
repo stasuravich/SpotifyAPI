@@ -3,7 +3,7 @@ import '../Css/Online.css';
 import axios from 'axios';
 
 const Online = memo(props=> {
-  console.log("Online Component");
+  //console.log("Online Component");
   const [open, setOpen]=useState(false);
   const [onlineClicked, setOnlineClicked]=useState(false);
   const addingTrack=useRef();
@@ -11,6 +11,7 @@ const Online = memo(props=> {
   let curTracks;
 
   useEffect(()=> {
+    //console.log("In useEffect")
     axios('https://api.spotify.com/v1/me', {
         method: 'GET',
         headers: {'Authorization' : 'Bearer ' + props.logInfo}

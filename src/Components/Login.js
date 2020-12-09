@@ -29,7 +29,7 @@ const Login =memo(props=>{
         <br/>
         <input className="TokenInput" type="text" placeholder="spotify token" onChange={e=> token.current=e.target.value} defaultValue =''/>
         <br/><br/>
-        <button type = "submit" >Submit</button>
+        <button type = "submit" id="submit-button">Submit</button>
       </form>
       {props.cred==="wrong" &&
         <div className="Wrong"> Invalid token, please try again</div>
