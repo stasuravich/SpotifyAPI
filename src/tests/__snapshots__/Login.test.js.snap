@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`snapshots Login snapshots 1`] = `
+<div
+  className="Login"
+>
+  <img
+    alt="Logo"
+    className="Logo"
+    src="adrian-korte-5gn2soeAc40-unsplash.jpg"
+  />
+  <h1>
+    Login
+  </h1>
+  <form
+    onSubmit={[Function]}
+  >
+    <label
+      className="TokenLabel"
+    >
+      Enter spotify token below (get it from 
+       
+      <a
+        href="https://beta.developer.spotify.com/documentation/web-playback-sdk/quick-start/#authenticating-with-spotify"
+      >
+        here
+      </a>
+      ):
+    </label>
+    <br />
+    <input
+      className="TokenInput"
+      defaultValue=""
+      onChange={[Function]}
+      placeholder="spotify token"
+      type="text"
+    />
+    <br />
+    <br />
+    <button
+      id="submit-button"
+      type="submit"
+    >
+      Submit
+    </button>
+  </form>
+</div>
+`;

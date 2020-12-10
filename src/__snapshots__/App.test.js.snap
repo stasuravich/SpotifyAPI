@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`snapshots App snapshots 1`] = `
+<div
+  className="App"
+>
+  <Memo()
+    setCred={[Function]}
+    setLoggedIn={[Function]}
+  />
+</div>
+`;

@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`snapshots SearchRes snapshots 1`] = `
+<Fragment>
+  <Memo()
+    changeSearchRes={[Function]}
+    class="SearchOnline"
+    inputRef={
+      Object {
+        "current": undefined,
+      }
+    }
+    placeh="Search for a song..."
+  />
+  <Memo()
+    inputRef={
+      Object {
+        "current": undefined,
+      }
+    }
+  />
+</Fragment>
+`;

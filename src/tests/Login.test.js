@@ -1,6 +1,7 @@
 import React from 'react';
 import Login from '../Components/Login';
 import {shallow} from "enzyme";
+import toJson from "enzyme-to-json";
 
 describe("rendering components", ()=> {
   it("renders App without crashing", ()=>{
@@ -16,4 +17,11 @@ describe("rendering components", ()=> {
     const label=wrapper.find("#submit-button").text();
     expect(label).toEqual("Submit");
   })
+})
+
+describe("snapshots", () => {
+  it("Login snapshots", () => {
+    const tree= shallow(<Login/>);
+    expect(toJson(tree)).toMatchSnapshot();
+  });
 })

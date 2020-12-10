@@ -32,7 +32,7 @@ const Login =memo(props=>{
         <button type = "submit" id="submit-button">Submit</button>
       </form>
       {props.cred==="wrong" &&
-        <div className="Wrong"> Invalid token, please try again</div>
+        <div className="Wrong">Invalid token, please try again</div>
       }
     </div>
   );

@@ -6,6 +6,7 @@ const Playlists = memo(props=> {
   let curTracks;
 
   const dropdownChanged = async e => {
+    console.log(props.playlists);
     props.playlists.current={selectedPlaylist: e.target.value,
                   listOfPlaylistsFromAPI: props.playlists.current.listOfPlaylistsFromAPI};
     curTracks = await props.getPlaylist(0, curTracks, e.target.value);
